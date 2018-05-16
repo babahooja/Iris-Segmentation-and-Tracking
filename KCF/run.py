@@ -8,6 +8,7 @@ import kcftracker
 selectingObject = False
 initTracking = False
 onTracking = False
+
 ix, iy, cx, cy = -1, -1, -1, -1
 w, h = 0, 0
 
@@ -45,6 +46,7 @@ def draw_boundingbox(event, x, y, flags, param):
 
 if __name__ == '__main__':
 	flag = 0
+
 	if(len(sys.argv) == 1):
 		cap = cv2.VideoCapture(0)
 		flag = 1
