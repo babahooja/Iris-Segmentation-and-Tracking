@@ -44,7 +44,7 @@ def draw_multi_boundingbox(event, x, y, flags, param):
 			if (counter <= num_objects):
 				counter += 1
 				selectingObject[num_objects-counter] = True
-			else:
+			if (counter == num_objects):
 				initTracking = True
 		else:
 			onTracking = False
@@ -91,6 +91,7 @@ if __name__ == '__main__':
 		exit(0)
 	firstFrame = frame.copy() # Copy to restore each frame after BB creation
 	while (not initTracking and flag == 2):
+		for i in range(num_objects)
 		if np.all(selectingObject):
 			cv2.rectangle(frame, (ix,iy), (cx,cy), (0,255,255), 1)
 			initbb.append([ix, iy, w, h])
@@ -98,6 +99,7 @@ if __name__ == '__main__':
 		cv2.waitKey(inteval)
 		frame = firstFrame.copy() # Duplicate into frame the non BB overlay frame
 	# Reading the subsequent frames in case of both camera & stored video
+	print( '#BBs: {}'.format(len(initbb)) )
 	while(cap.isOpened()):
 		ret, frame = cap.read()
 		if not ret:
