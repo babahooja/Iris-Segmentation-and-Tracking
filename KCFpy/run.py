@@ -43,53 +43,38 @@ def draw_boundingbox(event, x, y, flags, param):
 			initTracking = True
 
 
+
 if __name__ == '__main__':
 	flag = 0
-	if(len(sys.argv) == 1):
+	if(len(sys.argv)==1):
 		cap = cv2.VideoCapture(0)
-		flag = 1
-	elif(len(sys.argv) == 3):
-		## setting external camera
-		if (sys.argv[1].isdigit() and sys.argv[2] == 'cam'):
+	elif(len(sys.argv)==3):
+		## Set another camera
+		if(sys.argv[1].isdigit() and sys.argv[2] == 'camera'):  # True if sys.argv[1] is str of a nonnegative integer
+			cap = cv2.VideoCapture(int(sys.argv[1]))
+		elif (sys.argv[2] == 'video'):
 			cap = cv2.VideoCapture(sys.argv[1])
-			flag = 1
-		elif (sys.argv[2] == 'vid'):
-			cap = cv2.VideoCapture(sys.argv[1])
-			flag = 2
-		elif (sys.argv[2] == 'seq'):
-			cap = cv2.VideoCapture(sys.argv[1] + '%04d.jpg', cv2.CAP_IMAGES)
-			flag = 2
 			inteval = 30
-	else:
-		assert(0), "Please check help for description"
+		elif (sys.argv[2] == 'sequence'):
+			cap = cv2.VideoCapture('../datasets/' + sys.argv[1] + '/%03d.jpeg', cv2.CAP_IMAGES)
+			inteval = 30
+	else:  assert(0), "too many arguments"
 
-	tracker = kcftracker.KCFTracker(True, True, True)
-	# hog, fixed_window, multiscale
+	tracker = kcftracker.KCFTracker(True, True, True)  # hog, fixed_window, multiscale
 
-	cv2.namedWindow('Tracking')
-	cv2.setMouseCallback('Tracking',draw_boundingbox)
+	cv2.namedWindow('tracking')
+	cv2.setMouseCallback('tracking',draw_boundingbox)
 
-	# Reading the first frame in case of stored video
-	# This ensures we can mark the BB with stability.
-	ret, frame = cap.read()
-	if not ret:
-		print('Nothing was returned.')
-		exit(0)
-	firstFrame = frame.copy()
-	while (not initTracking and flag == 2):
-		if(selectingObject):
-			cv2.rectangle(frame, (ix,iy), (cx,cy), (0,255,255), 1)
-		cv2.imshow('Tracking', frame)
-		cv2.waitKey(inteval)
-		frame = firstFrame.copy()
-
-	# Reading the subsequent frames in case of both camera & stored video
 	while(cap.isOpened()):
 		ret, frame = cap.read()
+		# Resizing option
+		# h = int(frame.shape[0]*0.1) # scale h
+		# w = int(frame.shape[1]*0.1) # scale w
+		# frame = cv2.resize(frame, (w, h))
 		if not ret:
 			break
-		if flag == 1 and selectingObject:
-		 	cv2.rectangle(frame,(ix,iy), (cx,cy), (0,255,255), 1)
+		if(selectingObject):
+			cv2.rectangle(frame,(ix,iy), (cx,cy), (0,255,255), 1)
 		elif(initTracking):
 			initbb = [ix, iy, w, h]
 			cv2.rectangle(frame,(ix,iy), (ix+w,iy+h), (0,255,255), 2)
@@ -108,7 +93,7 @@ if __name__ == '__main__':
 			#duration = t1-t0
 			cv2.putText(frame, 'FPS: '+str(1/duration)[:4].strip('.'), (8,20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,0,255), 2)
 			cv2.putText(frame, 'Amplitude: '+ str(amplitude), (8,40), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,0,255), 2)
-		cv2.imshow('Tracking', frame)
+		cv2.imshow('tracking', frame)
 		# Exit on key 'esc' or 'q'
 		c = cv2.waitKey(inteval) & 0xFF
 		if c==27 or c==ord('q'):
