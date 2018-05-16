@@ -75,13 +75,13 @@ if __name__ == '__main__':
 	if not ret:
 		print('Nothing was returned.')
 		exit(0)
-	firstFrame = frame.copy()
+	firstFrame = frame.copy() # Copy to restore each frame after BB creation
 	while (not initTracking and flag == 2):
 		if(selectingObject):
 			cv2.rectangle(frame, (ix,iy), (cx,cy), (0,255,255), 1)
 		cv2.imshow('Tracking', frame)
 		cv2.waitKey(inteval)
-		frame = firstFrame.copy()
+		frame = firstFrame.copy() # Duplicate into frame the non BB overlay frame
 
 	# Reading the subsequent frames in case of both camera & stored video
 	while(cap.isOpened()):
