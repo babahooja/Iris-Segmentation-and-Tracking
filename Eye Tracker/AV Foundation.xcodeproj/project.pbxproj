@@ -21,7 +21,7 @@
 		978C333A20ADEA7B00578F50 /* VideoController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoController.swift; sourceTree = "<group>"; };
 		AF7DD4CF1ED3AA28005C880E /* AV Foundation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AV Foundation.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF7DD4D21ED3AA28005C880E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		AF7DD4D41ED3AA28005C880E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewController.swift; path = "AV Foundation/ViewController.swift"; sourceTree = "<group>"; };
+		AF7DD4D41ED3AA28005C880E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		AF7DD4D71ED3AA28005C880E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		AF7DD4D91ED3AA28005C880E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = "AV Foundation/Assets.xcassets"; sourceTree = "<group>"; };
 		AF7DD4DC1ED3AA28005C880E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -43,8 +43,8 @@
 			isa = PBXGroup;
 			children = (
 				AF7DD4D61ED3AA28005C880E /* Main.storyboard */,
-				AF7DD4D41ED3AA28005C880E /* ViewController.swift */,
 				978C333620AD585400578F50 /* CameraController.swift */,
+				AF7DD4D41ED3AA28005C880E /* ViewController.swift */,
 				978C333A20ADEA7B00578F50 /* VideoController.swift */,
 				AF7DD4D91ED3AA28005C880E /* Assets.xcassets */,
 				AF7DD4D11ED3AA28005C880E /* AV Foundation */,
