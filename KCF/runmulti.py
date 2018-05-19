@@ -91,7 +91,7 @@ if __name__ == '__main__':
 		exit(0)
 	firstFrame = frame.copy() # Copy to restore each frame after BB creation
 	while (not initTracking and flag == 2):
-		for i in range(num_objects)
+		for i in range(num_objects):
 		if np.all(selectingObject):
 			cv2.rectangle(frame, (ix,iy), (cx,cy), (0,255,255), 1)
 			initbb.append([ix, iy, w, h])
