@@ -19,11 +19,12 @@ protocol FrameExtractorDelegate: class {
 class FrameExtractor: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
 	
 	private let position = AVCaptureDevice.Position.back
-	private let quality = AVCaptureSession.Preset.high
+	private let quality = AVCaptureSession.Preset.medium
 	
 	private var permissionGranted = false
 	private let sessionQueue = DispatchQueue(label: "session queue")
 	private let captureSession = AVCaptureSession()
+	// We create the context only once to level the memory requirements
 	private let context = CIContext()
 	
 	/*to avoid a retain cycle, the delegate must be
@@ -101,12 +102,13 @@ class FrameExtractor: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
 		guard let connection = videoOutput.connection(with: AVFoundation.AVMediaType.video) else { return }
 		guard connection.isVideoOrientationSupported else { return }
 		guard connection.isVideoMirroringSupported else { return }
-		connection.videoOrientation = .landscapeLeft
-		connection.isVideoMirrored = position != .back
+		connection.videoOrientation = .portrait
+		connection.isVideoMirrored = position == .front
 	}
 	
 	private func selectCaptureDevice() -> AVCaptureDevice? {
 		let session = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: AVMediaType.video, position: position)
+		
 		return session.devices.first
 	}
 	
@@ -122,6 +124,7 @@ class FrameExtractor: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
 	// MARK: AVCaptureVideoDataOutputSampleBufferDelegate
 	func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!) {
 		guard let uiImage = imageFromSampleBuffer(sampleBuffer: sampleBuffer) else { return }
+		// move the image processing out of the main thread
 		DispatchQueue.main.async { [unowned self] in
 			self.delegate?.captured(image: uiImage)
 		}
