@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		978C333720AD585400578F50 /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978C333620AD585400578F50 /* CameraController.swift */; };
+		978C333B20ADEA7B00578F50 /* VideoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978C333A20ADEA7B00578F50 /* VideoController.swift */; };
 		AF7DD4D31ED3AA28005C880E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF7DD4D21ED3AA28005C880E /* AppDelegate.swift */; };
 		AF7DD4D51ED3AA28005C880E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF7DD4D41ED3AA28005C880E /* ViewController.swift */; };
 		AF7DD4D81ED3AA28005C880E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AF7DD4D61ED3AA28005C880E /* Main.storyboard */; };
@@ -17,6 +18,7 @@
 
 /* Begin PBXFileReference section */
 		978C333620AD585400578F50 /* CameraController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
+		978C333A20ADEA7B00578F50 /* VideoController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoController.swift; sourceTree = "<group>"; };
 		AF7DD4CF1ED3AA28005C880E /* AV Foundation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AV Foundation.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF7DD4D21ED3AA28005C880E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AF7DD4D41ED3AA28005C880E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ViewController.swift; path = "AV Foundation/ViewController.swift"; sourceTree = "<group>"; };
@@ -43,6 +45,7 @@
 				AF7DD4D61ED3AA28005C880E /* Main.storyboard */,
 				AF7DD4D41ED3AA28005C880E /* ViewController.swift */,
 				978C333620AD585400578F50 /* CameraController.swift */,
+				978C333A20ADEA7B00578F50 /* VideoController.swift */,
 				AF7DD4D91ED3AA28005C880E /* Assets.xcassets */,
 				AF7DD4D11ED3AA28005C880E /* AV Foundation */,
 				AF7DD4D01ED3AA28005C880E /* Products */,
@@ -144,6 +147,7 @@
 				978C333720AD585400578F50 /* CameraController.swift in Sources */,
 				AF7DD4D51ED3AA28005C880E /* ViewController.swift in Sources */,
 				AF7DD4D31ED3AA28005C880E /* AppDelegate.swift in Sources */,
+				978C333B20ADEA7B00578F50 /* VideoController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
