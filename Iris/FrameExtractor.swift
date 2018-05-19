@@ -11,6 +11,8 @@ import UIKit
 import AVFoundation
 
 protocol FrameExtractorDelegate: class {
+	// this protocol is initiated (called) whenever UIImage
+	// is available
 	func captured(image: UIImage)
 }
 
@@ -24,12 +26,26 @@ class FrameExtractor: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
 	private let captureSession = AVCaptureSession()
 	private let context = CIContext()
 	
+	/*to avoid a retain cycle, the delegate must be
+	declared weak. Because it is declared weak, we add
+	the class keyword to the protocol’s declaration.*/
 	weak var delegate: FrameExtractorDelegate?
 	
 	override init() {
 		super.init()
 		// Overriding the init of the NSObject Protocol
 		checkPermission()
+		
+		/*first we need to start the capture session and don’t
+		forget that the capture session must be started on the
+		dedicated serial queue we created before, as starting
+		the session is a blocking call and we don’t want to
+		block the UI.*/
+		
+		/*Remember that we have two queues in play here, one is
+		the session queue, the other one is the queue each frame
+		is sent to. They are different.*/
+		
 		sessionQueue.async { [unowned self] in
 			self.configureSession()
 			self.captureSession.startRunning()
@@ -96,6 +112,7 @@ class FrameExtractor: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
 	
 	// MARK: Sample buffer to UIImage conversion
 	private func imageFromSampleBuffer(sampleBuffer: CMSampleBuffer) -> UIImage? {
+		// transform the sample buffer to CVImageBuffer
 		guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return nil }
 		let ciImage = CIImage(cvPixelBuffer: imageBuffer)
 		guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else { return nil }
