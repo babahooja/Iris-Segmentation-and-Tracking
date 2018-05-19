@@ -10,8 +10,11 @@ import UIKit
 
 class ViewController: UIViewController {
 
+	var frameExtractor: FrameExtractor!
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
+		frameExtractor = FrameExtractor()
 		// Do any additional setup after loading the view, typically from a nib.
 	}
 
