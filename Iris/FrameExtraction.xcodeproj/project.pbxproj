@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		978C337F20B23F2A00578F50 /* EyeTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978C337E20B23F2A00578F50 /* EyeTracker.swift */; };
 		C3E867761E1488470042F78A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3E867751E1488470042F78A /* AppDelegate.swift */; };
 		C3E867781E1488470042F78A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3E867771E1488470042F78A /* ViewController.swift */; };
 		C3E8677B1E1488470042F78A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C3E867791E1488470042F78A /* Main.storyboard */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		978C337E20B23F2A00578F50 /* EyeTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EyeTracker.swift; sourceTree = "<group>"; };
 		C3E867721E1488470042F78A /* FrameExtraction.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FrameExtraction.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3E867751E1488470042F78A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C3E867771E1488470042F78A /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -58,6 +60,7 @@
 			children = (
 				C3E867751E1488470042F78A /* AppDelegate.swift */,
 				C3E867771E1488470042F78A /* ViewController.swift */,
+				978C337E20B23F2A00578F50 /* EyeTracker.swift */,
 				C3E867871E14898D0042F78A /* FrameExtractor.swift */,
 				C3E867791E1488470042F78A /* Main.storyboard */,
 				C3E8677C1E1488470042F78A /* Assets.xcassets */,
@@ -143,6 +146,7 @@
 			files = (
 				C3E867881E14898D0042F78A /* FrameExtractor.swift in Sources */,
 				C3E867781E1488470042F78A /* ViewController.swift in Sources */,
+				978C337F20B23F2A00578F50 /* EyeTracker.swift in Sources */,
 				C3E867761E1488470042F78A /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -284,7 +288,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 6V8949R93S;
 				INFOPLIST_FILE = FrameExtraction/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Himanshu-Ahuja.FrameExtraction";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -298,7 +302,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 6V8949R93S;
 				INFOPLIST_FILE = FrameExtraction/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Himanshu-Ahuja.FrameExtraction";
 				PRODUCT_NAME = "$(TARGET_NAME)";
