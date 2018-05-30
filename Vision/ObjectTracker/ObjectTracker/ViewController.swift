@@ -23,13 +23,23 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     
     private let visionSequenceHandler = VNSequenceRequestHandler()
     private lazy var cameraLayer: AVCaptureVideoPreviewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
+	
+	private let quality = AVCaptureSession.Preset.hd1920x1080
+	
     private lazy var captureSession: AVCaptureSession = {
         let session = AVCaptureSession()
-        session.sessionPreset = AVCaptureSession.Preset.photo
+        session.sessionPreset = quality
         guard
-            let backCamera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
-            let input = try? AVCaptureDeviceInput(device: backCamera)
+            let captureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+            let input = try? AVCaptureDeviceInput(device: captureDevice)
         else { return session }
+		
+		if(captureDevice.isFocusModeSupported(.continuousAutoFocus)) {
+			try! captureDevice.lockForConfiguration()
+			captureDevice.focusMode = .continuousAutoFocus
+			captureDevice.unlockForConfiguration()
+		}
+		
         session.addInput(input)
         return session
     }()
