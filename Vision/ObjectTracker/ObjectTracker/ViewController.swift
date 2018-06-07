@@ -12,15 +12,21 @@ import UIKit
 
 class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
     
-    @IBOutlet private weak var cameraView: UIView?
+	var amplitude: Double = 0.0
+	var originalRect: CGRect = .zero
+	@IBOutlet private weak var cameraView: UIView?
     @IBOutlet private weak var highlightView: UIView? {
         didSet {
             self.highlightView?.layer.borderColor = UIColor.red.cgColor
             self.highlightView?.layer.borderWidth = 4
             self.highlightView?.backgroundColor = .clear
+			self.amplitude = 0
         }
     }
-    
+	
+	@IBOutlet private weak var amplitudeLabel: UILabel!
+//	amplitudeLabel.layer.zPostion = 1
+	
     private let visionSequenceHandler = VNSequenceRequestHandler()
     private lazy var cameraLayer: AVCaptureVideoPreviewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
 	
@@ -49,7 +55,8 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         
         // hide the red focus area on load
         self.highlightView?.frame = .zero
-        
+//		self.amplitude?
+		
         // make the camera appear on the screen
         self.cameraView?.layer.addSublayer(self.cameraLayer)
         
@@ -113,9 +120,13 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             var transformedRect = newObservation.boundingBox
             transformedRect.origin.y = 1 - transformedRect.origin.y
             let convertedRect = self.cameraLayer.layerRectConverted(fromMetadataOutputRect: transformedRect)
-            
+		
             // move the highlight view
             self.highlightView?.frame = convertedRect
+			self.amplitude = pow(pow(Double(convertedRect.midX - self.originalRect.midX), 2) + pow(Double(convertedRect.midY - self.originalRect.midY), 2) , 0.5)
+			print(self.amplitude)
+			self.amplitudeLabel.text = ("Amplitude: " + String(self.amplitude))
+			
         }
     }
     
@@ -123,12 +134,11 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         // get the center of the tap
         self.highlightView?.frame.size = CGSize(width: 120, height: 120)
         self.highlightView?.center = sender.location(in: self.view)
-        
         // convert the rect for the initial observation
-        let originalRect = self.highlightView?.frame ?? .zero
+        originalRect = self.highlightView?.frame ?? .zero
+
         var convertedRect = self.cameraLayer.metadataOutputRectConverted(fromLayerRect: originalRect)
         convertedRect.origin.y = 1 - convertedRect.origin.y
-        
         // set the observation
         let newObservation = VNDetectedObjectObservation(boundingBox: convertedRect)
         self.lastObservation = newObservation
@@ -137,6 +147,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     @IBAction private func resetTapped(_ sender: UIBarButtonItem) {
         self.lastObservation = nil
         self.highlightView?.frame = .zero
+		self.amplitude = 0
     }
 }
 
