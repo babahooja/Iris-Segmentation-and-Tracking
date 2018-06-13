@@ -2,8 +2,8 @@
 //  ViewController.swift
 //  ObjectTracker
 //
-//  Created by Jeffrey Bergier on 6/8/17.
-//  Copyright © 2017 Saturday Apps. All rights reserved.
+//  Created by Himanshu Ahuja on 6/8/18.
+//  Copyright © 2018 neuro.uno. All rights reserved.
 //
 
 import AVFoundation
@@ -20,8 +20,9 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             self.highlightView?.backgroundColor = .clear
         }
     }
-    
-    private let visionSequenceHandler = VNSequenceRequestHandler()
+    private let tracker = CSRTtrackerOCPP()
+    private let visionSequenceHandler = VNSequenceRequestHandler() // Change this line
+	private var lastObservation: VNDetectedObjectObservation?
     private lazy var cameraLayer: AVCaptureVideoPreviewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
     private lazy var captureSession: AVCaptureSession = {
         let session = AVCaptureSession()
@@ -59,8 +60,6 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         self.cameraLayer.frame = self.cameraView?.bounds ?? .zero
     }
     
-    private var lastObservation: VNDetectedObjectObservation?
-    
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard
             // make sure the pixel buffer can be converted
@@ -73,7 +72,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         let request = VNTrackObjectRequest(detectedObjectObservation: lastObservation, completionHandler: self.handleVisionRequestUpdate)
         // set the accuracy to high
         // this is slower, but it works a lot better
-        request.trackingLevel = .accurate
+//        request.trackingLevel = .accurate
         
         // perform the request
         do {

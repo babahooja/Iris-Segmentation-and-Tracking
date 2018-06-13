@@ -2,8 +2,8 @@
 //  AppDelegate.swift
 //  ObjectTracker
 //
-//  Created by Jeffrey Bergier on 6/8/17.
-//  Copyright © 2017 Saturday Apps. All rights reserved.
+//  Created by Himanshu Ahuja on 6/8/18.
+//  Copyright © 2018 neuro.uno. All rights reserved.
 //
 
 import UIKit
