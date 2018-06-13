@@ -23,7 +23,7 @@ int main( int argc, char** argv ){
 	// create a tracker object
 	Ptr<TrackerCSRT> tracker = TrackerCSRT::create();
 	// set input video
-	std::string video = argv[1];
+	string video = argv[1];
 	VideoCapture cap(video);
 //	VideoCapture cap(0); // for webcam
 	
