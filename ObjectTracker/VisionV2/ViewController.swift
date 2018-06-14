@@ -20,8 +20,9 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             self.highlightView?.backgroundColor = .clear
         }
     }
-    
-    private let visionSequenceHandler = VNSequenceRequestHandler()
+	private let CSRTHandler = CSRT();
+//    private let visionSequenceHandler = VNSequenceRequestHandler()
+	private var lastObservation: VNDetectedObjectObservation?
     private lazy var cameraLayer: AVCaptureVideoPreviewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
     private lazy var captureSession: AVCaptureSession = {
         let session = AVCaptureSession()
@@ -58,9 +59,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         // make sure the layer is the correct size
         self.cameraLayer.frame = self.cameraView?.bounds ?? .zero
     }
-    
-    private var lastObservation: VNDetectedObjectObservation?
-    
+	
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard
             // make sure the pixel buffer can be converted
@@ -73,8 +72,8 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         let request = VNTrackObjectRequest(detectedObjectObservation: lastObservation, completionHandler: self.handleVisionRequestUpdate)
         // set the accuracy to high
         // this is slower, but it works a lot better
-        request.trackingLevel = .accurate
-        
+//        request.trackingLevel = .accurate
+		
         // perform the request
         do {
             try self.visionSequenceHandler.perform([request], on: pixelBuffer)
@@ -93,12 +92,12 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             self.lastObservation = newObservation
             
             // check the confidence level before updating the UI
-            guard newObservation.confidence >= 0.3 else {
-                // hide the rectangle when we lose accuracy so the user knows something is wrong
-                self.highlightView?.frame = .zero
-                return
-            }
-            
+//            guard newObservation.confidence >= 0.3 else {
+//                // hide the rectangle when we lose accuracy so the user knows something is wrong
+//                self.highlightView?.frame = .zero
+//                return
+//            }
+			
             // calculate view rect
             var transformedRect = newObservation.boundingBox
             transformedRect.origin.y = 1 - transformedRect.origin.y
