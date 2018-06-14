@@ -6,9 +6,6 @@
 //  Copyright © 2018 Saturday Apps. All rights reserved.
 //
 
-//#ifndef TrackerCSRT_h
-//#define TrackerCSRT_h
-
 #include <CoreGraphics/CoreGraphics.h>
 #include <CoreVideo/CoreVideo.h>
 #include <CoreMedia/CoreMedia.h>
@@ -27,11 +24,9 @@ using namespace cv;
 @property (assign) Rect2d roi;
 - (id)initTrackerObject;
 //- (id)initTrackerObject:(struct CGRect)bbox :(CMSampleBufferRef) frame;
-- (struct CGRect)trackerUpdate:(struct CGRect)bbox :(CMSampleBufferRef) frame;
-- (void)trackerInit:(struct CGRect)bbox :(CMSampleBufferRef) frame;
-- (Mat)CMSampleBufferToMat:(CMSampleBufferRef) frame;
+- (struct CGRect)trackerUpdate:(struct CGRect)bbox :(CVPixelBufferRef) frame;
+- (void)trackerInit:(struct CGRect)bbox :(CVPixelBufferRef) frame;
+- (Mat)CVPixelBufferToMat:(CVPixelBufferRef) frame;
 
 @end
 
-//
-//#endif /* TrackerCSRT_h */
