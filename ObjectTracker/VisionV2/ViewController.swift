@@ -20,13 +20,14 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             self.highlightView?.backgroundColor = .clear
         }
     }
-	private let CSRTHandler = CSRT();
+	private let CSRTHandler = CSRT()
 //    private let visionSequenceHandler = VNSequenceRequestHandler()
-	private var lastObservation: VNDetectedObjectObservation?
+	private var lastObservation: CGRect?
+	private var flag:bool = true
     private lazy var cameraLayer: AVCaptureVideoPreviewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
     private lazy var captureSession: AVCaptureSession = {
         let session = AVCaptureSession()
-        session.sessionPreset = AVCaptureSession.Preset.photo
+        session.sessionPreset = AVCaptureSession.Preset.hd1920x1080
         guard
             let backCamera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
             let input = try? AVCaptureDeviceInput(device: backCamera)
@@ -61,22 +62,25 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     }
 	
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        guard
+		guard
             // make sure the pixel buffer can be converted
             let pixelBuffer: CVPixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer),
             // make sure that there is a previous observation we can feed into the request
             let lastObservation = self.lastObservation
         else { return }
-        
+		
+		
         // create the request
-        let request = VNTrackObjectRequest(detectedObjectObservation: lastObservation, completionHandler: self.handleVisionRequestUpdate)
+		
+		let request = CSRTHandler.trackerInit(lastObservation, pixelBuffer)
+//		VNTrackObjectRequest(detectedObjectObservation: lastObservation, completionHandler: self.handleVisionRequestUpdate)
         // set the accuracy to high
         // this is slower, but it works a lot better
 //        request.trackingLevel = .accurate
 		
         // perform the request
         do {
-            try self.visionSequenceHandler.perform([request], on: pixelBuffer)
+            try self.CSRTHandler.trackerUpdate()
         } catch {
             print("Throws: \(error)")
         }
@@ -99,12 +103,12 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
 //            }
 			
             // calculate view rect
-            var transformedRect = newObservation.boundingBox
-            transformedRect.origin.y = 1 - transformedRect.origin.y
-            let convertedRect = self.cameraLayer.layerRectConverted(fromMetadataOutputRect: transformedRect)
-            
+//            var transformedRect = newObservation.boundingBox
+//            transformedRect.origin.y = 1 - transformedRect.origin.y
+//            let convertedRect = self.cameraLayer.layerRectConverted(fromMetadataOutputRect: transformedRect)
+			
             // move the highlight view
-            self.highlightView?.frame = convertedRect
+            self.highlightView?.frame = newObservation
         }
     }
     
@@ -115,11 +119,11 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         
         // convert the rect for the initial observation
         let originalRect = self.highlightView?.frame ?? .zero
-        var convertedRect = self.cameraLayer.metadataOutputRectConverted(fromLayerRect: originalRect)
-        convertedRect.origin.y = 1 - convertedRect.origin.y
-        
+//        var convertedRect = self.cameraLayer.metadataOutputRectConverted(fromLayerRect: originalRect)
+//        convertedRect.origin.y = 1 - convertedRect.origin.y
+		
         // set the observation
-        let newObservation = VNDetectedObjectObservation(boundingBox: convertedRect)
+		let newObservation = originalRect;
         self.lastObservation = newObservation
     }
     
