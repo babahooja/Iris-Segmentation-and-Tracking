@@ -2,8 +2,8 @@
 //  ViewController.m
 //  VisionSeg
 //
-//  Created by FloodSurge on 15/7/14.
-//  Copyright (c) 2015年 FloodSurge. All rights reserved.
+//  Created by Himanshu Ahuja on 12/6/18.
+//  Copyright (c) 2018 neuro.uno. All rights reserved.
 //
 
 #import "ViewController.h"
@@ -23,9 +23,8 @@
 #import "StruckTracker.h"
 #import "Config.h"
 
-
 //#define RATIO  640.0/568.0 // for 640x480
-#define RATIO 1280.0/568.0
+#define RATIO 1280.0/720.0
 using namespace cv;
 using namespace cv::colortracker;
 using namespace std;
@@ -39,6 +38,7 @@ typedef enum {
     COLOR_TRACKER,
     CAMSHIFT_TRACKER,
     STRUCK_TRACKER,
+	THREE_TRACKER,
 }TrackType;
 
 @interface ViewController ()<CvVideoCameraDelegate>
@@ -54,6 +54,7 @@ typedef enum {
     cv::Rect selectBox;
     cv::Rect initCTBox;
     cv::Rect box;
+	
     bool beginInit;
     bool startTracking;
     
@@ -71,11 +72,10 @@ typedef enum {
     
     // Struck Tracker
     StruckTracker *struckTracker;
-	
-	
-    
     
 }
+
+
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @property (nonatomic,strong) CvVideoCamera *videoCamera;
 @end
@@ -88,7 +88,7 @@ typedef enum {
 //    for Session Preset 640 * 480
 //    self.imageView.frame = CGRectMake(0, 0, 568, 480 * 568/640.0);
 //	self.imageView.frame = CGRectMake(0, 0, 568, 1080 * 568/1920.0);//for 1920x1080
-	self.imageView.frame = CGRectMake(0, 0, 568, 1080 * 568/1920.0);//for 1280x720
+	self.imageView.frame = CGRectMake(0, 0, 720, 720 * 720/1280.0);//for 1280x720
     self.videoCamera = [[CvVideoCamera alloc] initWithParentView:self.imageView];
     self.videoCamera.delegate = self;
     self.videoCamera.defaultAVCaptureDevicePosition = AVCaptureDevicePositionBack;
@@ -153,6 +153,12 @@ typedef enum {
     [self reset];
 }
 
+- (IBAction)ThreeTrack:(id)sender
+{
+	trackType = THREE_TRACKER;
+	[self reset];
+}
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
     startTracking = false;
@@ -211,10 +217,95 @@ typedef enum {
             [self camshiftTracking:image];
         case STRUCK_TRACKER:
             [self struckTracking:image];
+		case THREE_TRACKER:
+			[self threeTracking:image];
         default:
             break;
     }
 
+}
+
+-(void)threeTracking:(cv::Mat &)image
+{
+	Mat img_gray, img_gray2;
+	cvtColor(image, img_gray, CV_BGR2GRAY);
+	cvtColor(image,img_gray2,CV_RGB2GRAY);
+	
+	if (beginInit) {
+		//////////////////////////////////////////////
+		if (cmtTracker != NULL) {
+			delete cmtTracker;
+		}
+		cmtTracker = new cmt::CMT();
+		cmtTracker->initialize(img_gray2,initCTBox);
+		NSLog(@"cmt track init!");
+		
+		/////////////////////////////////////////////
+		NSString *path = [[NSBundle mainBundle] pathForResource:@"config" ofType:@"txt"];
+		string configPath = [path UTF8String];
+		Config conf(configPath);
+		cout << conf << endl;
+		srand(conf.seed);
+		if (struckTracker != NULL) {
+			delete struckTracker;
+		}
+		
+		struckTracker = new StruckTracker(conf);
+		
+		FloatStruckRect floatRect;
+		floatRect.Set(initCTBox.x, initCTBox.y, initCTBox.width, initCTBox.height);
+		struckTracker->Initialise(img_gray, floatRect);
+		NSLog(@"Struck tracker init");
+		/////////////////////////////////////////////////
+		if (ctTracker != NULL) {
+			delete ctTracker;
+		}
+		ctTracker = new CompressiveTracker;
+		ctTracker->init(img_gray2,initCTBox);
+		NSLog(@"init CT Box: %d,%d,%d,%d",initCTBox.x,initCTBox.y,initCTBox.width,initCTBox.height);
+		box = initCTBox;
+		rectangle(image, initCTBox, Scalar(0,0,255),1);
+		/////////////////////////////////////////////////
+		
+		
+		startTracking = true;
+		beginInit = false;
+	}
+	
+	if (startTracking) {
+		///////////////////////////////////////////////
+		NSLog(@"Struck Tracker process...");
+		struckTracker->Track(img_gray);
+		FloatStruckRect bb = struckTracker->GetBB();
+		cv::Rect bb_rot;
+		bb_rot.x = (int)bb.XMin();
+		bb_rot.y = (int)bb.YMin();
+		bb_rot.width = (int)bb.Width();
+		bb_rot.height = (int)bb.Height();
+		
+		rectangle(image, bb_rot, Scalar(125,255,0),1);
+		//////////////////////////////////////////////
+		NSLog(@"cmt process...");
+		cmtTracker->processFrame(img_gray2);
+		
+		for(size_t i = 0; i < cmtTracker->points_active.size(); i++)
+		{
+			circle(image, cmtTracker->points_active[i], 2, Scalar(255,0,0));
+		}
+		RotatedRect rect = cmtTracker->bb_rot;
+		Point2f vertices[4];
+		rect.points(vertices);
+		for (int i = 0; i < 4; i++)
+		{
+			line(image, vertices[i], vertices[(i+1)%4], Scalar(255,0,255));
+		}
+		/////////////////////////////////////////////
+		ctTracker->processFrame(img_gray2, box);
+		
+		rectangle(image, box, Scalar(0,0,255),1);
+		
+	}
+	
 }
 
 - (void)struckTracking:(cv::Mat &)image
@@ -255,8 +346,81 @@ typedef enum {
         bb_rot.height = (int)bb.Height();
         
         rectangle(image, bb_rot, Scalar(125,255,0),1);
+		
+		
     }
 }
+
+
+- (void)cmtTracking:(cv::Mat &)image
+{
+	Mat img_gray;
+	cvtColor(image,img_gray,CV_RGB2GRAY);
+	
+	if (beginInit) {
+		if (cmtTracker != NULL) {
+			delete cmtTracker;
+		}
+		cmtTracker = new cmt::CMT();
+		cmtTracker->initialize(img_gray,initCTBox);
+		NSLog(@"cmt track init!");
+		startTracking = true;
+		beginInit = false;
+	}
+	
+	if (startTracking) {
+		NSLog(@"cmt process...");
+		cmtTracker->processFrame(img_gray);
+		
+		for(size_t i = 0; i < cmtTracker->points_active.size(); i++)
+		{
+			circle(image, cmtTracker->points_active[i], 2, Scalar(255,0,0));
+		}
+		
+		
+		RotatedRect rect = cmtTracker->bb_rot;
+		Point2f vertices[4];
+		rect.points(vertices);
+		for (int i = 0; i < 4; i++)
+		{
+			line(image, vertices[i], vertices[(i+1)%4], Scalar(255,0,255));
+		}
+		
+		
+	}
+}
+
+- (void)compressiveTracking:(cv::Mat &)image
+{
+	Mat img_gray;
+	cvtColor(image,img_gray,CV_RGB2GRAY);
+	if (beginInit)
+	{
+		startTracking=true;
+		if (ctTracker != NULL) {
+			delete ctTracker;
+		}
+		ctTracker = new CompressiveTracker;
+		ctTracker->init(img_gray,initCTBox);
+		NSLog(@"init CT Box: %d,%d,%d,%d",initCTBox.x,initCTBox.y,initCTBox.width,initCTBox.height);
+		box = initCTBox;
+		rectangle(image, initCTBox, Scalar(0,0,255),1);
+		beginInit =false;
+	}
+	
+	if (startTracking)
+	{
+		/** if (box.size())
+		 {
+		 
+		 }*/
+		ctTracker->processFrame(img_gray, box);
+		
+		rectangle(image, box, Scalar(0,0,255),1);
+		
+	}
+}
+
 
 - (void)camshiftTracking:(cv::Mat &)image
 {
@@ -347,78 +511,6 @@ typedef enum {
             rectangle(image, *tldTracker->currBB, Scalar(0,255,0),1);
         }
 
-    }
-}
-
-
-- (void)cmtTracking:(cv::Mat &)image
-{
-    Mat img_gray;
-    cvtColor(image,img_gray,CV_RGB2GRAY);
-    
-    if (beginInit) {
-        if (cmtTracker != NULL) {
-            delete cmtTracker;
-        }
-        cmtTracker = new cmt::CMT();
-        cmtTracker->initialize(img_gray,initCTBox);
-        NSLog(@"cmt track init!");
-        startTracking = true;
-        beginInit = false;
-    }
-    
-    if (startTracking) {
-        NSLog(@"cmt process...");
-        cmtTracker->processFrame(img_gray);
-        
-        for(size_t i = 0; i < cmtTracker->points_active.size(); i++)
-        {
-            circle(image, cmtTracker->points_active[i], 2, Scalar(255,0,0));
-        }
-        
-        
-        RotatedRect rect = cmtTracker->bb_rot;
-        Point2f vertices[4];
-        rect.points(vertices);
-        for (int i = 0; i < 4; i++)
-        {
-            line(image, vertices[i], vertices[(i+1)%4], Scalar(255,0,255));
-        }
-        
-        
-    }
-}
-
-- (void)compressiveTracking:(cv::Mat &)image
-{
-    Mat img_gray;
-    cvtColor(image,img_gray,CV_RGB2GRAY);
-    // 初始化选择框，初始化ct算法
-    if (beginInit)
-    {
-        startTracking=true;
-        if (ctTracker != NULL) {
-            delete ctTracker;
-        }
-        ctTracker = new CompressiveTracker;
-        ctTracker->init(img_gray,initCTBox);
-        NSLog(@"init CT Box: %d,%d,%d,%d",initCTBox.x,initCTBox.y,initCTBox.width,initCTBox.height);
-        box = initCTBox;
-        rectangle(image, initCTBox, Scalar(0,0,255),1);
-        beginInit =false;
-    }
-    
-    //  采用ct算法进行跟踪
-    if (startTracking)
-    {
-        /** if (box.size())
-         {
-         
-         }*/
-        ctTracker->processFrame(img_gray, box);
-        
-        rectangle(image, box, Scalar(0,0,255),1);
-        
     }
 }
 
