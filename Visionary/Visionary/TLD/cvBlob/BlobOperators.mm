@@ -1,13 +1,13 @@
 #include <limits.h>
 #include "BlobOperators.h"
 
-/***************************************************************************
+/* **************************************************************************
   Implementació de les classes per al càlcul de característiques sobre el blob
 
   Implementation of the helper classes to perform operations on blobs
-/**************************************************************************/
+/ ************************************************************************** /
 
-/**
+/ *  *
 - FUNCTION: Moment
 - FUNCTIONALITY: Calculates the pq moment of the blob
 - PARAMETERS:
