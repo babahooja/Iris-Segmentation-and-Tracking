@@ -74,3 +74,4 @@ fastlane/screenshots/**/*.png
 fastlane/test_output
 *.pbxproj
 *.xcworkspacedata
+SafeCopy/*
