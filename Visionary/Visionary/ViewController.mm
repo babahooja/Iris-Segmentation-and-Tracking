@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import <AVFoundation/AVFoundation.h>
+#import <Foundation/Foundation.h>
 #import <opencv2/opencv.hpp>
 
 #import <opencv2/imgproc/types_c.h>
@@ -44,8 +45,7 @@ typedef enum {
 @interface ViewController ()<CvVideoCameraDelegate>
 {
     CGPoint rectLeftTopPoint;
-    CGPoint rectRightDownPoint
-    ;
+	CGPoint rectRightDownPoint;
     
     TrackType trackType;
     
@@ -77,6 +77,8 @@ typedef enum {
 
 
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
+@property (weak, nonatomic) IBOutlet UILabel *AmplitudeYLabel;
+@property (weak, nonatomic) IBOutlet UILabel *AmplitudeXLabel;
 @property (nonatomic,strong) CvVideoCamera *videoCamera;
 @end
 
@@ -104,6 +106,10 @@ typedef enum {
     startTracking = false;
     
     trackType = CMT_TRACKER;
+	
+	
+	//Amplitude Label
+	
 }
 
 - (void)didReceiveMemoryWarning {
@@ -158,6 +164,7 @@ typedef enum {
 	trackType = THREE_TRACKER;
 	[self reset];
 }
+
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
@@ -313,6 +320,8 @@ typedef enum {
     Mat img_gray;
     cvtColor(image,img_gray,CV_BGR2GRAY);
     //cv::flip(img_gray, img_gray, 1);
+	float amplitudeX;
+	float amplitudeY;
     if (beginInit) {
         startTracking = true;
         beginInit = false;
@@ -347,6 +356,9 @@ typedef enum {
         
         rectangle(image, bb_rot, Scalar(125,255,0),1);
 		
+		amplitudeX = box.x + box.width/2.0 - initCTBox.x - initCTBox.width/2.0;
+		amplitudeY = box.y + box.height/2.0 - initCTBox.y - initCTBox.height/2.0;
+		[self updateLabelX:amplitudeX andLabelY:amplitudeY];
 		
     }
 }
@@ -356,7 +368,8 @@ typedef enum {
 {
 	Mat img_gray;
 	cvtColor(image,img_gray,CV_RGB2GRAY);
-	
+	float amplitudeX = 0;
+	float amplitudeY = 0;
 	if (beginInit) {
 		if (cmtTracker != NULL) {
 			delete cmtTracker;
@@ -385,7 +398,17 @@ typedef enum {
 		{
 			line(image, vertices[i], vertices[(i+1)%4], Scalar(255,0,255));
 		}
-		
+		float centroid1[2], centroid2[2];
+		centroid1[0] = (vertices[0].x + vertices[1].x + vertices[2].x)/3.0;
+		centroid2[0] = (vertices[0].x + vertices[3].x + vertices[2].x)/3.0;
+		centroid1[1] = (vertices[0].y + vertices[1].y + vertices[2].y)/3.0;
+		centroid2[1] = (vertices[0].y + vertices[3].y + vertices[2].y)/3.0;
+		float center[2];
+		center[0] = (centroid1[0] + centroid2[0])/2.0;
+		center[1] = (centroid1[1] + centroid2[1])/2.0;
+		amplitudeX = center[0] - initCTBox.x - initCTBox.width/2.0;
+		amplitudeY = center[1] - initCTBox.y - initCTBox.height/2.0;
+		[self updateLabelX:amplitudeX andLabelY:amplitudeY];
 		
 	}
 }
@@ -394,6 +417,8 @@ typedef enum {
 {
 	Mat img_gray;
 	cvtColor(image,img_gray,CV_RGB2GRAY);
+	float amplitudeX = 0;
+	float amplitudeY = 0;
 	if (beginInit)
 	{
 		startTracking=true;
@@ -406,6 +431,7 @@ typedef enum {
 		box = initCTBox;
 		rectangle(image, initCTBox, Scalar(0,0,255),1);
 		beginInit =false;
+		[self updateLabelX:amplitudeX andLabelY:amplitudeY];
 	}
 	
 	if (startTracking)
@@ -417,7 +443,9 @@ typedef enum {
 		ctTracker->processFrame(img_gray, box);
 		
 		rectangle(image, box, Scalar(0,0,255),1);
-		
+		amplitudeX = box.x + box.width/2.0 - initCTBox.x - initCTBox.width/2.0;
+		amplitudeY = box.y + box.height/2.0 - initCTBox.y - initCTBox.height/2.0;
+		[self updateLabelX:amplitudeX andLabelY:amplitudeY];
 	}
 }
 
@@ -512,6 +540,14 @@ typedef enum {
         }
 
     }
+}
+
+-(void) updateLabelX:(float) amplitudeX andLabelY:(float)amplitudeY{
+	dispatch_async(dispatch_get_main_queue(), ^{
+		self.AmplitudeXLabel.text = [NSString stringWithFormat:@"%f", amplitudeX];
+		self.AmplitudeYLabel.text = [NSString stringWithFormat:@"%f", amplitudeY];
+	});
+	
 }
 
 @end
