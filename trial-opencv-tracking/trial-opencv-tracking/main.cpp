@@ -8,24 +8,24 @@ using namespace std;
 using namespace cv;
 int main( int argc, char** argv ){
 	// show help
-	if(argc<2){
-		cout<<
-		" Usage: tracker <video_name>\n"
-		" examples:\n"
-		" example_tracking_kcf Bolt/img/%04d.jpg\n"
-		" example_tracking_kcf faceocc2.webm\n"
-		<< endl;
-		return 0;
-	}
+//    if(argc<2){
+//        cout<<
+//        " Usage: tracker <video_name>\n"
+//        " examples:\n"
+//        " example_tracking_kcf Bolt/img/%04d.jpg\n"
+//        " example_tracking_kcf faceocc2.webm\n"
+//        << endl;
+//        return 0;
+//    }
 	// declares all required variables
 	Rect2d roi;
 	Mat frame;
 	// create a tracker object
 	Ptr<TrackerCSRT> tracker = TrackerCSRT::create();
 	// set input video
-	string video = argv[1];
-	VideoCapture cap(video);
-//	VideoCapture cap(0); // for webcam
+//    string video = argv[1];
+//    VideoCapture cap(video);
+    VideoCapture cap(0); // for webcam
 	
 	// get bounding box
 	cap >> frame;
