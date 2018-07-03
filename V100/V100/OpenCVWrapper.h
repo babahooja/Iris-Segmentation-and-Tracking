@@ -6,11 +6,13 @@
 //  Copyright © 2018 Himanshu Ahuja. All rights reserved.
 //
 
+//#import <opencv2/opencv.hpp>
 #import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
 
 //using namespace cv;
 
 @interface OpenCVWrapper : NSObject
 //    cv::cvMat &hello;
-- (void)isThisWorking;
+-(void)processImage:(NSArray*)image;
 @end
