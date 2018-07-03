@@ -8,54 +8,35 @@
 // Add the opencv headers above the
 #import <opencv2/opencv.hpp>
 #import <opencv2/opencv.hpp>
-#include <opencv2/core/utility.hpp>
-#include <opencv2/tracking.hpp>
-#include <opencv2/videoio.hpp>
-#include <opencv2/highgui.hpp>
+#import <opencv2/core/utility.hpp>
+#import <opencv2/tracking.hpp>
+#import <opencv2/videoio.hpp>
+#import <opencv2/highgui.hpp>
+#import <opencv2/imgcodecs/ios.h>
 #import "OpenCVWrapper.h"
+
+#import <AVFoundation/AVFoundation.h>
 
 using namespace std;
 using namespace cv;
 
+@interface OpenCVWrapper()
+//-(void)processImage:(NSArray*)image;
+
+@end
+
 @implementation OpenCVWrapper
-- (void) isThisWorking {
-//    cout << "Hey" << endl;
-//    Rect2d roi;
-//    Mat frame;
-//    // create a tracker object
-//    Ptr<TrackerCSRT> tracker = TrackerCSRT::create();
-//    // set input video
-//    //    string video = argv[1];
-//    //    VideoCapture cap(video);
-//    VideoCapture cap(0); // for webcam
+-(void)processImage:(NSArray*)image
+{
+    // Do some OpenCV stuff with the image
+    Mat imageMat;
+    UIImageToMat(image[0], imageMat);
+    
+//    UIImage* img = MatToUIImage(imageMat);
+//    cvtColor(image, image_copy, CV_BGRA2BGR);
 //
-//    // get bounding box
-//    cap >> frame;
-//    roi=selectROI("tracker",frame);
-//    //quit if ROI was not selected
-//    if(roi.width==0 || roi.height==0)
-//
-//        return 0;
-//    // initialize the tracker
-//    tracker->init(frame,roi);
-//    // perform the tracking process
-//    printf("Start the tracking process, press ESC to quit.\n");
-//    for ( ;; ){
-//        // get frame from the video
-//        cap >> frame;
-//        // stop the program if no more images
-//        if(frame.rows==0 || frame.cols==0)
-//            break;
-//        // update the tracking result
-//        tracker->update(frame,roi);
-//        // draw the tracked object
-//        rectangle( frame, roi, Scalar( 255, 0, 0 ), 2, 1 );
-//        // show image with the tracked object
-//        imshow("tracker",frame);
-//        //quit on ESC button
-//        if(waitKey(1)==27)break;
-//    }
-//    return 0;
-    cout<<"Hello sexy!";
+//    // invert image
+//    bitwise_not(image_copy, image_copy);
+//    cvtColor(image_copy, image, CV_BGR2BGRA);
 }
 @end
