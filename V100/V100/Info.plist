@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Let $(PRODUCT_NAME) access the system camera.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>To access the iris file it needs to process</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>To write objects into the Photo library</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
