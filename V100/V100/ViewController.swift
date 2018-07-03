@@ -10,74 +10,6 @@ import MobileCoreServices
 import CoreGraphics
 import AVKit
 
-
-
-//class ViewController: UIViewController {
-//
-//    var imagePickerController = UIImagePickerController()
-//    var videoURL: URL?
-//    var videoFrames:[UIImage] = []
-//
-//
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        // Do any additional setup after loading the view, typically from a nib.
-////        self.openImgPicker()
-//////        let openCVWrapper = OpenCVWrapper()
-//////        openCVWrapper.isThisWorking()
-//        var actionSheet = AttachmentHandler.shared.showAttachmentActionSheet(vc: self)
-//
-////        actionSheet.
-//
-////        let asset:AVAsset = AVAsset(url:(self.videoURL)!)
-////        let mutableVideoDuration = CMTimeGetSeconds(asset.duration)
-////        //        let mutableVideoDurationIntValue = Int(mutableVideoDuration)
-////        let assetImgGenerate:AVAssetImageGenerator = AVAssetImageGenerator(asset:asset)
-////        assetImgGenerate.appliesPreferredTrackTransform = true
-////        //        let duration:Float64 = CMTimeGetSeconds(asset.duration)
-////        let durationInt:Int = Int(mutableVideoDuration)
-////
-////        for index:Int in 0 ..< durationInt
-////        {
-////            generateFrames(assetImgGenerate:assetImgGenerate, fromTime:Float64(index))
-////        }
-//
-//    }
-//
-//    override func didReceiveMemoryWarning() {
-//        super.didReceiveMemoryWarning()
-//    }
-//
-//    private func generateFrames(assetImgGenerate:AVAssetImageGenerator,fromTime:Float64){
-//        let time:CMTime = CMTimeMakeWithSeconds(fromTime, 600)
-//        let cgImage:CGImage?
-//
-//        do{
-//            cgImage = try assetImgGenerate.copyCGImage(at:time, actualTime:nil)
-//        }
-//        catch{
-//            cgImage = nil
-//        }
-//
-//        guard let img:CGImage = cgImage else {return}
-//
-//        let frameImg:UIImage = UIImage(cgImage:img)
-//        self.videoFrames.append(frameImg)
-//    }
-//
-//}
-
-
-//extension ViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-//    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
-//        self.videoURL = info[UIImagePickerControllerMediaURL] as? URL
-//        print("videoURL:\(String(describing: videoURL))")
-////        print('J)
-//        self.dismiss(animated: true, completion: nil)
-//    }
-//}
-//
-
 /////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////// SAFE CODE ///////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -90,16 +22,14 @@ class ViewController: UIViewController {
     var imagePickerController = UIImagePickerController()
     var videoURL: URL?
     var videoFrames:[UIImage] = []
-//    let sampleCounts = 100
-
+//    let sampleCounts = 1
+    let overlay = UIView()
+    var lastPoint = CGPoint.zero
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         self.openImgPicker()
-//        let openCVWrapper = OpenCVWrapper()
-//        openCVWrapper.isThisWorking()
-
     }
 
     override func didReceiveMemoryWarning() {
@@ -133,6 +63,44 @@ class ViewController: UIViewController {
         imagePickerController.allowsEditing = true
         imagePickerController.mediaTypes = [kUTTypeMovie as NSString as String]
         present(imagePickerController, animated: true, completion: nil)
+    }
+    
+    // Draw a rectangle over the first image
+    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        
+        //Save original tap Point
+        if let touch = touches.first {
+            lastPoint = touch.locationInView(self.view)
+        }
+    }
+    
+    override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        //Get the current known point and redraw
+        if let touch = touches.first {
+            let currentPoint = touch.locationInView(view)
+            reDrawSelectionArea(lastPoint, toPoint: currentPoint)
+        }
+    }
+    
+    func reDrawSelectionArea(fromPoint: CGPoint, toPoint: CGPoint) {
+        overlay.hidden = false
+        
+        //Calculate rect from the original point and last known point
+        let rect = CGRectMake(min(fromPoint.x, toPoint.x),
+                              min(fromPoint.y, toPoint.y),
+                              fabs(fromPoint.x - toPoint.x),
+                              fabs(fromPoint.y - toPoint.y));
+        
+        overlay.frame = rect
+    }
+    
+    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        overlay.hidden = true
+        
+        //User has lift his finger, use the rect
+        applyFilterToSelectedArea(overlay.frame)
+        
+        overlay.frame = CGRectZero //reset overlay for next tap
     }
 }
 
