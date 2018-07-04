@@ -10,51 +10,66 @@ import MobileCoreServices
 import CoreGraphics
 import AVKit
 
-/////////////////////////////////////////////////////////////////////////////////
-////////////////////////////// SAFE CODE ///////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-
 class ViewController: UIViewController {
+    // Add the outlets
     @IBOutlet weak var avaImg: UIImageView!
-
-
+    @IBOutlet weak var boundingbox: UIView!
+    
+    // Add the variables and constants
     var imagePickerController = UIImagePickerController()
     var videoURL: URL?
     var videoFrames:[UIImage] = []
-//    let sampleCounts = 1
-    let overlay = UIView()
-    var lastPoint = CGPoint.zero
-
+    var sampleCountsView: Int32?
+    let openCVWrapper = OpenCVWrapper()
+//    let boundingBox = BoundingBox()
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+//        self.view.addSubview(boundingBox)
         self.openImgPicker()
+        boundingbox.layer.borderColor = UIColor.red.cgColor
+        boundingbox.layer.borderWidth = 2.0
+        boundingbox.backgroundColor = UIColor.black.withAlphaComponent(0)
+        boundingbox.isOpaque = false
+
+        // Set the properties of the bounding box object
+//        boundingBox.layer.borderColor = UIColor.black.cgColor
+//        boundingBox.isUserInteractionEnabled  = true
+    }
+    @IBAction func handlePan(recognizer:UIPanGestureRecognizer) {
+        let translation = recognizer.translation(in: self.view)
+        if let view = recognizer.view {
+            view.center = CGPoint(x:view.center.x + translation.x,
+                                  y:view.center.y + translation.y)
+        }
+        recognizer.setTranslation(CGPoint.zero, in: self.view)
+    }
+    
+    @IBAction func handlePinch(recognizer:UIPinchGestureRecognizer) {
+        if let view = recognizer.view {
+            view.transform = view.transform.scaledBy(x: recognizer.scale, y: recognizer.scale)
+            recognizer.scale = 1
+        }
+    }
+    
+    @IBAction func startTracking(sender: UIButton) {
+        print("You just pressed the button")
+        let cx = boundingbox.frame.origin.x
+        let cy = boundingbox.frame.origin.y
+        let width = boundingbox.frame.width
+        let height = boundingbox.frame.height
+        let minx = cx - (width/2)
+        let miny = cy - (height/2)
+        let roi = CGRect(x: minx, y: miny, width: width, height: height)
+//        print(roi)
+        openCVWrapper.processImage(videoFrames, roi, sampleCountsView!)
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
-    }
-
-    private func generateFrames(assetImgGenerate:AVAssetImageGenerator,fromTime:Float64){
-        let time:CMTime = CMTimeMakeWithSeconds(fromTime, 600)
-        let cgImage:CGImage?
-
-        do{
-            cgImage = try assetImgGenerate.copyCGImage(at:time, actualTime:nil)
-        }
-        catch{
-            cgImage = nil
-        }
-
-        guard let img:CGImage = cgImage else {return}
-
-        let frameImg:UIImage = UIImage(cgImage:img)
-        avaImg.image = frameImg
-        
-        self.videoFrames.append(frameImg)
-        print(videoFrames.count)
     }
 
     private func openImgPicker() {
@@ -64,43 +79,23 @@ class ViewController: UIViewController {
         imagePickerController.mediaTypes = [kUTTypeMovie as NSString as String]
         present(imagePickerController, animated: true, completion: nil)
     }
-    
-    // Draw a rectangle over the first image
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        
-        //Save original tap Point
-        if let touch = touches.first {
-            lastPoint = touch.locationInView(self.view)
+
+}
+
+extension UIPinchGestureRecognizer {
+    func scale(view: UIView) -> (x: CGFloat, y: CGFloat)? {
+        if numberOfTouches > 1 {
+            let touch1 = self.location(ofTouch: 0, in: view)
+            let touch2 = self.location(ofTouch: 1, in: view)
+            let deltaX = abs(touch1.x - touch2.x)
+            let deltaY = abs(touch1.y - touch2.y)
+            let sum = deltaX + deltaY
+            if sum > 0 {
+                let scale = self.scale
+                return (1.0 + (scale - 1.0) * (deltaX / sum), 1.0 + (scale - 1.0) * (deltaY / sum))
+            }
         }
-    }
-    
-    override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        //Get the current known point and redraw
-        if let touch = touches.first {
-            let currentPoint = touch.locationInView(view)
-            reDrawSelectionArea(lastPoint, toPoint: currentPoint)
-        }
-    }
-    
-    func reDrawSelectionArea(fromPoint: CGPoint, toPoint: CGPoint) {
-        overlay.hidden = false
-        
-        //Calculate rect from the original point and last known point
-        let rect = CGRectMake(min(fromPoint.x, toPoint.x),
-                              min(fromPoint.y, toPoint.y),
-                              fabs(fromPoint.x - toPoint.x),
-                              fabs(fromPoint.y - toPoint.y));
-        
-        overlay.frame = rect
-    }
-    
-    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        overlay.hidden = true
-        
-        //User has lift his finger, use the rect
-        applyFilterToSelectedArea(overlay.frame)
-        
-        overlay.frame = CGRectZero //reset overlay for next tap
+        return nil
     }
 }
 
@@ -109,7 +104,6 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
         self.videoURL = info[UIImagePickerControllerMediaURL] as? URL
         print("videoURL:\(String(describing: self.videoURL))")
         self.dismiss(animated: true, completion: nil)
-        print("Hello")
         let asset:AVAsset = AVAsset(url:self.videoURL!)
         let generator = AVAssetImageGenerator(asset: asset)
         generator.requestedTimeToleranceAfter = kCMTimeZero
@@ -117,8 +111,10 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
         let videoDuration = asset.duration
         
         var frameForTimes = [NSValue]()
-        let fps = asset.tracks[0].nominalFrameRate
-        let sampleCounts = Int(Float(videoDuration.seconds) * fps)
+//        let fps = asset.tracks[0].nominalFrameRate
+//        let sampleCounts = Int(Float(videoDuration.seconds) * fps)
+        let sampleCounts = 100
+        self.sampleCountsView = Int32(sampleCounts)
         let totalTimeLength = Int(videoDuration.seconds * Double(videoDuration.timescale))
         let step = totalTimeLength / sampleCounts
         
@@ -132,30 +128,16 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
                 if let image = image {
                     let k = requestedTime.value
                     print(requestedTime.value, requestedTime.seconds, actualTime.value)
-                    self.videoFrames.append(UIImage(cgImage: image))
+                    let frameImg = UIImage(cgImage: image)
+                    self.videoFrames.append(frameImg)
                     if (k == 0){
-                        
+                        //displays only the first image in the view
+                        self.avaImg.image = frameImg
                     }
                 }
             }
         })
-        
-        let openCVWrapper = OpenCVWrapper()
-        openCVWrapper.processImage(self.videoFrames)
-        
-//        let asset:AVAsset = AVAsset(url:self.videoURL!)
-//        let mutableVideoDuration = CMTimeGetSeconds(asset.duration)
-//        //        let mutableVideoDurationIntValue = Int(mutableVideoDuration)
-//        let assetImgGenerate:AVAssetImageGenerator = AVAssetImageGenerator(asset:asset)
-//        assetImgGenerate.appliesPreferredTrackTransform = true
-//        //        let duration:Float64 = CMTimeGetSeconds(asset.duration)
-//        let durationInt:Int = Int(mutableVideoDuration)
-//
-//        for index:Int in 0 ..< durationInt
-//        {
-//            generateFrames(assetImgGenerate:assetImgGenerate, fromTime:Float64(index))
-//        }
-        
+//        self.bringSubviewToFront(boundingbox)
     }
 }
 
