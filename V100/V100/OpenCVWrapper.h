@@ -14,5 +14,5 @@
 
 @interface OpenCVWrapper : NSObject
 //    cv::cvMat &hello;
--(void)processImage:(NSArray*)image;
+-(void)processImage:(NSArray*)image :(CGRect)roi :(int)numSamples;
 @end
