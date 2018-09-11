@@ -1,5 +1,5 @@
 //
-//  OpenCVWrapper.m
+//  OpenCVWrapper.mm
 //  V100
 //
 //  Created by Himanshu Ahuja on 01/07/18.
@@ -16,6 +16,7 @@
 #import "OpenCVWrapper.h"
 
 #import <AVFoundation/AVFoundation.h>
+#import <CoreGraphics/CoreGraphics.h>
 
 using namespace std;
 using namespace cv;
@@ -26,7 +27,7 @@ using namespace cv;
 @end
 
 @implementation OpenCVWrapper
--(void)processImage:(NSArray*)image :(CGRect)roi :(int)numSamples
+-(NSMutableArray* )processImage:(NSArray*)image :(CGRect)roi :(int)numSamples
 {
     printf("We are in processing image function.\n");
     Mat imageMat;
@@ -40,12 +41,11 @@ using namespace cv;
                           int(roi.size.height));
     
 //    NSLog(@"%@", [NSString stringWithFormat:@"(%.2f,%.2f,%.2f,%.2f)", roi_rect.x, roi_rect.y, roi_rect.width, roi_rect.height]);
-//
+    NSMutableArray * myArray = [NSMutableArray arrayWithCapacity:numSamples];
     UIImageToMat(image[0], imageMat);
     cvtColor(imageMat, imageMat, CV_BGRA2BGR);
     
     printf("Number of channels: %d", imageMat.channels());
-    printf("Does this work?");
     tracker->init(imageMat, roi_rect);
     printf("\nThe initialization works\n\n");
 //    Mat imageMat[numSamples];
@@ -54,7 +54,9 @@ using namespace cv;
         cvtColor(imageMat, imageMat, CV_BGRA2BGR);
 //        printf(NSString stringWithFormat:@"(%d, %d)", imageMat.rows, imageMat.cols);
         printf("(%.2f,%.2f,%.2f,%.2f)", roi_rect.x, roi_rect.y, roi_rect.width, roi_rect.height);
+        [myArray addObject: [NSValue valueWithCGRect: CGRectMake(roi_rect.x+roi_rect.width/2, roi_rect.y+roi_rect.height/2, roi_rect.width, roi_rect.height)]];
         tracker->update(imageMat, roi_rect);
+        
     }
     
 //
@@ -69,6 +71,7 @@ using namespace cv;
 //    // invert image
 //    bitwise_not(image_copy, image_copy);
 //    cvtColor(image_copy, image, CV_BGR2BGRA);
+    return myArray;
 }
 
 @end
