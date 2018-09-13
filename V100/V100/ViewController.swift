@@ -121,7 +121,9 @@ class ViewController: UIViewController,UIGestureRecognizerDelegate {
         self.initroi = CGRect(x: minx, y: miny, width: width, height: height)
 //        print(roi)
         self.positions = openCVWrapper.processImage(videoFrames, initroi, sampleCountsView!) as! [CGRect]
+        // To calculate the performance of the solutions
         self.calculatePerformance()
+
         
         
     }
@@ -141,18 +143,22 @@ class ViewController: UIViewController,UIGestureRecognizerDelegate {
     
     private func calculatePerformance(){
         print("")
-        let base = self.calculateCenter(rect: initroi);
+        let base = self.calculateCenter(rect: self.initroi);
         let sampleCounts = 100
         var difx: [CGFloat] = []
         var dify: [CGFloat] = []
         difx.append(0.0)
         dify.append(0.0)
         print(self.timeArray[0], difx[0], dify[0])
+        boundingbox.frame = CGRect(origin: CGPoint(x: base.x, y: base.y), size: CGSize(width: self.initroi.width, height: self.initroi.height))
         for i in 1 ..< sampleCounts {
+            self.avaImg.image = videoFrames[i]
+            boundingbox.frame = CGRect(origin: CGPoint(x: positions[i].origin.x, y: positions[i].origin.y), size: CGSize(width: positions[i].width, height: positions[i].height))
             difx.append(base.x - positions[i].origin.x)
             dify.append(base.y - positions[i].origin.y)
             print (self.timeArray[i], difx[i], dify[i])
         }
+        
         
     }
     private func calculateCenter(rect: CGRect) -> CGPoint {
