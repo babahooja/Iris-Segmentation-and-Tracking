@@ -18,11 +18,16 @@ class ViewController: UIViewController {
     var timer = Timer()
     let df = DateFormatter()
     let button = UIButton(type: .custom)
+    let minTime = 15 // in seconds * 10
+    let maxTime = 25 // in seconds * 10
+    let abSequence = true
+    let totalCharacters = 20
     
     
     @objc func timerUpdate(){
         print (testCounter, self.characterStream[testCounter], df.string(from: Date()))
-        self.charDisplay.text = String(self.characterStream[testCounter])
+        self.charDisplay.text = String(self.characterStream[testCounter]) // display the character
+        
         testCounter += 1
         if testCounter == self.characterStream.count {
             timer.invalidate()
@@ -30,7 +35,7 @@ class ViewController: UIViewController {
         }
         else{
             timer.invalidate()
-            let randomTime = Double(Int.random(in: 15..<25)) * 0.1
+            let randomTime = Double(Int.random(in: minTime..<maxTime)) * 0.1
             timer = Timer.scheduledTimer(timeInterval: randomTime, target: self, selector: #selector(ViewController.timerUpdate), userInfo: nil, repeats: false)
         }
     }
@@ -63,19 +68,52 @@ class ViewController: UIViewController {
         initVariables()
         characterStream.removeAll()
         DispatchQueue.global(qos: .userInteractive).async {
-            while(self.characterStream.count < 10){
-                let randomInt = Int.random(in: 2..<26)
-                if Int.random(in: 0..<6) < 4 {
-                    print("Character Generated: ", self.characterSet[randomInt])
-                    self.characterStream.append(self.characterSet[randomInt])
+            while(self.characterStream.count < self.totalCharacters){
+                if self.abSequence == true{ // IF A & B ARE TO BE STUCK TOGETHER
+                    let randomInt = Int.random(in: 2..<26)
+                    if Int.random(in: 0..<6) < 4 {
+                        print("Character Generated: ", self.characterSet[randomInt])
+                        self.characterStream.append(self.characterSet[randomInt])
+                    }
+                    else{
+                        
+                        self.characterStream.append("A")
+                        self.characterStream.append("B")
+                        print("Character Generated: A")
+                        print("Character Generated: B")
+                    }
                 }
-                else{
-                    self.characterStream.append("A")
-                    self.characterStream.append("B")
-                    print("Character Generated: A\n", "Character Generated: B")
+                else{ // if A and B can be independent
+                    // (but still give the idea that they are stuck together)
+                    let randomInt = Int.random(in: 0..<26)
+                    if Int.random(in: 0..<6) < 4 {
+                        print("Character Generated: ", self.characterSet[randomInt])
+                        self.characterStream.append(self.characterSet[randomInt])
+                    }
+                    else{
+                        if Float.random(in: 0..<1) < 0.7{
+                            // either print A or B
+                            if Float.random(in: 0..<1) < 0.5{
+                                self.characterStream.append("A")
+                                print("Character Generated: A")
+                            }
+                            else{
+                                self.characterStream.append("B")
+                                print("Character Generated: B")
+                            }
+                        }
+                        else{
+                            // Print Both A and B
+                            self.characterStream.append("A")
+                            print("Character Generated: A")
+                            self.characterStream.append("B")
+                            print("Character Generated: B")
+                        }
+                        
+                    }
                 }
             }
-            self.characterStream.append("✅")
+            self.characterStream.append("🤝")
             DispatchQueue.main.async {
                 self.charDisplay.text = String(self.characterStream.remove(at: 0))
                 self.timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(ViewController.timerUpdate), userInfo: nil, repeats: false)
